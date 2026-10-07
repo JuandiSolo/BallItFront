@@ -1,0 +1,11 @@
+<header class="topbar">
+  <a class="brand" routerLink="/">🏀 Ball<span>It</span></a>
+  <nav>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Analizar</a>
+    <a routerLink="/historial" routerLinkActive="active">Historial</a>
+    <a routerLink="/comparar" routerLinkActive="active">Comparar</a>
+  </nav>
+</header>
+<main class="container">
+  <router-outlet />
+</main>

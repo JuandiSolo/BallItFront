@@ -1,0 +1,92 @@
+<section class="hero">
+  <h1>Antes vs. después</h1>
+  <p class="muted">Compara dos análisis para ver si tu técnica cambió.</p>
+</section>
+
+<div class="card">
+  <div class="grid-2">
+    <div class="field">
+      <label class="label" for="before">Antes</label>
+      <select id="before" (change)="before.set($any($event.target).value)">
+        <option value="">Elegir…</option>
+        @for (it of items(); track it.analysis_id) {
+          <option [value]="it.analysis_id" [selected]="before() === it.analysis_id">{{ label(it) }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label class="label" for="after">Después</label>
+      <select id="after" (change)="after.set($any($event.target).value)">
+        <option value="">Elegir…</option>
+        @for (it of items(); track it.analysis_id) {
+          <option [value]="it.analysis_id" [selected]="after() === it.analysis_id">{{ label(it) }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <button class="btn primary block" type="button" [disabled]="loading()" (click)="run()">
+    {{ loading() ? 'Comparando…' : 'Comparar' }}
+  </button>
+</div>
+
+@if (error(); as e) {
+  <p class="note error">{{ e }}</p>
+}
+
+@if (data(); as d) {
+  @let c = d.cmp;
+  <section class="card verdict" [class]="c.verdict">
+    <span class="verdict-icon">{{ verdictIcon(c.verdict) }}</span>
+    <h2>{{ verdictText(c.verdict) }}</h2>
+    <p class="muted small">Cambio mínimo para considerarlo real: {{ c.min_change }}</p>
+  </section>
+
+  @for (w of c.warnings; track $index) {
+    <p class="note warn">{{ w }}</p>
+  }
+
+  <div class="card">
+    <table class="cmp-table">
+      <thead>
+        <tr><th></th><th>Antes</th><th>Después</th><th>Cambio</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Puntaje</td>
+          <td>{{ c.before.score }}</td>
+          <td>{{ c.after.score }}</td>
+          <td>{{ sign(c.delta.score) }}</td>
+        </tr>
+        <tr>
+          <td>{{ featureLabel(d.rule) }}</td>
+          <td>{{ value(c.before.mean, d.rule) }}</td>
+          <td>{{ value(c.after.mean, d.rule) }}</td>
+          <td>{{ sign(c.delta.mean) }}</td>
+        </tr>
+        <tr>
+          <td>% tiros buenos</td>
+          <td>{{ c.before.pct_bueno }}%</td>
+          <td>{{ c.after.pct_bueno }}%</td>
+          <td>{{ sign(c.delta.pct_bueno) }}</td>
+        </tr>
+        <tr>
+          <td>Tiros analizados</td>
+          <td>{{ c.before.n }}</td>
+          <td>{{ c.after.n }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <figure class="card cmp-fig">
+      <app-secure-media [path]="c.before_frame_url" alt="Antes" />
+      <figcaption>Antes</figcaption>
+    </figure>
+    <figure class="card cmp-fig">
+      <app-secure-media [path]="c.after_frame_url" alt="Después" />
+      <figcaption>Después</figcaption>
+    </figure>
+  </div>
+}

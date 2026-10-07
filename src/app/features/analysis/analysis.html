@@ -1,0 +1,26 @@
+@if (error(); as e) {
+  <div class="card center">
+    <h2>No pudimos completar el análisis</h2>
+    <p class="note error">{{ e.message }}</p>
+    @if (isRecordingIssue(e.code)) {
+      <p class="muted">
+        Prueba con un video donde se vea el cuerpo completo, con buena luz y desde el momento en que
+        el balón sube hasta el lanzamiento.
+      </p>
+    }
+    <a class="btn primary" routerLink="/">Probar con otro video</a>
+  </div>
+} @else if (job(); as j) {
+  @if (j.status === 'processing') {
+    <div class="card center">
+      <h2>Analizando tu tiro…</h2>
+      <p class="muted">{{ j.step }}</p>
+      <div class="bar"><div class="bar-fill" [style.width.%]="percent()"></div></div>
+      <p class="muted small">{{ percent() }}%</p>
+    </div>
+  } @else if (j.result; as r) {
+    <app-result-view [result]="r" [mediaPending]="!!j.media_pending" />
+  }
+} @else {
+  <div class="card center"><p class="muted">Cargando…</p></div>
+}
