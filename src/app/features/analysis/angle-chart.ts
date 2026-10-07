@@ -10,7 +10,7 @@ const PAD = { l: 40, r: 12, t: 14, b: 26 };
   selector: 'app-angle-chart',
   template: `
     @if (chart(); as c) {
-      <svg [attr.viewBox]="'0 0 ' + w + ' ' + h" role="img" aria-label="Ángulo del brazo en el tiempo">
+      <svg class="chart" [attr.viewBox]="'0 0 ' + w + ' ' + h" role="img" aria-label="Ángulo del brazo en el tiempo">
         @for (t of c.yTicks; track t.v) {
           <line [attr.x1]="pad.l" [attr.x2]="w - pad.r" [attr.y1]="t.y" [attr.y2]="t.y" class="grid" />
           <text [attr.x]="pad.l - 6" [attr.y]="t.y + 4" class="tick" text-anchor="end">{{ t.v }}°</text>

@@ -29,19 +29,34 @@ npm install
 npm start          # = ng serve  → http://localhost:4200
 ```
 
+## Probarlo en el celular (misma red Wi-Fi)
+1. Averigua la IP de tu PC (Linux: `hostname -I`; Windows: `ipconfig`), por ejemplo `192.168.1.20`.
+2. Backend, aceptando conexiones de la red y ese origen:
+   ```bash
+   BALLIT_CORS_ORIGINS=http://localhost:4200,http://192.168.1.20:4200 python -m uvicorn api:app --host 0.0.0.0 --port 8000
+   ```
+3. Front: `npm start -- --host 0.0.0.0`
+4. En el celular abre `http://192.168.1.20:4200`. El front calcula solo la dirección de la API
+   (`http://<la misma IP>:8000`). Si no conecta, revisa el firewall de tu PC (puertos 4200 y 8000).
+
+Para instalarla como app (pantalla completa, icono propio) el navegador exige HTTPS; por HTTP en la red
+local solo podrás agregar un acceso directo a la pantalla de inicio.
+
 ## Configuración
 La URL de la API está en `src/environments/environment.ts` (`apiBase`, por defecto `http://127.0.0.1:8000`).
 
 ## Estructura
 ```
 src/app/
-├── core/                  # modelos del contrato, servicio de la API, interceptor X-User-Id, utilidades
-├── shared/secure-media.ts # carga imágenes/videos de /files/... (exigen el header X-User-Id) vía blob
+├── core/                  # modelos del contrato, servicio de la API, interceptor X-User-Id, perfil local
+├── shared/                # iconos, anillo de puntaje, sparkline, cabecera, media segura (blob)
 └── features/
-    ├── upload/            # subir video + opciones (brazo, cámara, objetivo)
-    ├── analysis/          # progreso (polling) + resultado: coach, tiros, gráfica del ángulo
+    ├── home/              # inicio: último análisis, evolución, consejos
+    ├── upload/            # nuevo análisis (video + opciones)
+    ├── analysis/          # progreso (polling) + resultado en pestañas: Resumen, Coach, Tiros, Gráfica
     ├── history/           # lista, eliminar, elegir 2 para comparar
-    └── compare/           # antes vs. después
+    ├── compare/           # progreso: antes vs. después
+    └── profile/           # nombre, mano por defecto, identificador
 ```
 
 ## Notas
