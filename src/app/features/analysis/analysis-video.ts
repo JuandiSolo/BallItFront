@@ -84,10 +84,12 @@ import { drawPose, frameAtTime } from './pose-overlay';
     `
       :host {
         display: block;
+        margin-inline: -16px;
       }
       .video-card {
         border: 1px solid var(--line);
-        border-radius: var(--radius);
+        border-radius: 0;
+        border-inline: 0;
         overflow: hidden;
         background: var(--card);
       }
@@ -98,7 +100,7 @@ import { drawPose, frameAtTime } from './pose-overlay';
       video {
         display: block;
         width: 100%;
-        max-height: 480px;
+        height: auto;
         object-fit: contain;
       }
       canvas {
@@ -147,6 +149,11 @@ import { drawPose, frameAtTime } from './pose-overlay';
       .video-tools span {
         flex: 1;
         text-align: right;
+      }
+      @media (max-width: 360px) {
+        .video-tools span {
+          display: none;
+        }
       }
     `,
   ],

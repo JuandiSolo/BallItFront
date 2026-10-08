@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { ShotCarousel } from './shot-carousel';
+import { AngleChart } from './angle-chart';
 import { BallitApi } from '../../core/ballit-api.service';
 import { AnalysisResult, Shot } from '../../core/models';
 import { ResultView } from './result-view';
@@ -72,6 +75,7 @@ describe('unified feedback', () => {
     mediaUrl: jasmine.createSpy(),
   };
   beforeEach(() => {
+    api.history.calls.reset();
     api.history.and.returnValue(of([]));
     TestBed.configureTestingModule({
       imports: [ResultView],
@@ -95,12 +99,61 @@ describe('unified feedback', () => {
       el.querySelector('app-result-view > :first-child')?.tagName ?? el.firstElementChild?.tagName,
     ).toBe('APP-ANALYSIS-VIDEO');
   });
-  it('keeps feedback available when history cannot load and does not invent a streak', () => {
-    api.history.and.returnValue(throwError(() => new Error('offline')));
+  it('leaves coach and moments collapsed and fetches no history on results', () => {
     const fixture = TestBed.createComponent(ResultView);
-    fixture.componentRef.setInput('result', result(1));
+    fixture.componentRef.setInput('result', result(2));
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.training-streak')).toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Mantén el control');
+    const el: HTMLElement = fixture.nativeElement;
+    expect(api.history).not.toHaveBeenCalled();
+    expect(el.textContent).not.toContain('de racha');
+    expect(el.querySelector<HTMLDetailsElement>('.coach-fold')?.open).toBeFalse();
+    expect(el.querySelector<HTMLDetailsElement>('.moments-fold')?.open).toBeFalse();
+    expect(el.querySelector('app-shot-carousel')).toBeNull();
+    const moments = el.querySelector<HTMLDetailsElement>('.moments-fold')!;
+    moments.open = true;
+    moments.dispatchEvent(new Event('toggle'));
+    fixture.detectChanges();
+    expect(el.querySelector('app-shot-carousel')).not.toBeNull();
+  });
+  it('changes the active shot and its angle window and seeks its release time', () => {
+    const fixture = TestBed.createComponent(ShotCarousel);
+    const data = result(2);
+    data.shots[0].frames.start = 0;
+    data.shots[1].frames.start = 4;
+    const frames = Array.from({ length: 11 }, (_, i) => ({
+      i,
+      t: i / 4,
+      ok: true,
+      p: null,
+      angle: i * 4,
+    }));
+    fixture.componentRef.setInput('analysisId', 'test');
+    fixture.componentRef.setInput('shots', data.shots);
+    fixture.componentRef.setInput('rule', data.rule);
+    fixture.componentRef.setInput('frames', frames);
+    fixture.detectChanges();
+    const chart = () =>
+      fixture.debugElement.query(By.directive(AngleChart)).componentInstance as AngleChart;
+    expect(
+      chart()
+        .frames()
+        .map((f) => f.t),
+    ).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    const el: HTMLElement = fixture.nativeElement;
+    el.querySelector<HTMLButtonElement>('[aria-label="Lanzamiento siguiente"]')!.click();
+    fixture.detectChanges();
+    expect(chart().shots()[0].n).toBe(2);
+    expect(
+      chart()
+        .frames()
+        .map((f) => f.t),
+    ).toEqual([1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]);
+    const seek = jasmine.createSpy();
+    fixture.componentInstance.momentSelected.subscribe(seek);
+    el.querySelector<HTMLButtonElement>('.shot-head button')!.click();
+    expect(seek).toHaveBeenCalledOnceWith(2);
+    el.querySelector<HTMLButtonElement>('[aria-label="Lanzamiento siguiente"]')!.click();
+    fixture.detectChanges();
+    expect(chart().shots()[0].n).toBe(2);
   });
 });

@@ -3,16 +3,6 @@
 
 <app-analysis-video #player [result]="r" />
 
-@if (streak(); as days) {
-  <section class="card training-streak">
-    <span aria-hidden="true">🔥</span>
-    <div>
-      <strong>{{ days }} {{ days === 1 ? 'día' : 'días' }} de racha</strong>
-      <p class="muted small">Sigue entrenando tu técnica</p>
-    </div>
-  </section>
-}
-
 <section class="card center">
   <app-score-ring [score]="r.summary.score" [size]="150" />
   <h2 class="mt">
@@ -37,14 +27,6 @@
   </div>
 </div>
 
-@if (topIssue(); as issue) {
-  <section class="card focus-card">
-    <span class="pill">Lo principal a mejorar</span>
-    <h3>{{ issue.titulo }}</h3>
-    <p class="muted">{{ issue.intenta_esto }}</p>
-  </section>
-}
-
 @if (r.shots.length > 1) {
   <section class="card">
     <h3>Evolución de tus lanzamientos</h3>
@@ -58,127 +40,111 @@
   <p class="muted small">Las líneas verticales marcan el momento de cada lanzamiento.</p>
 </section>
 
-<section aria-labelledby="coach-title">
-  <h2 id="coach-title" class="section-title">Tu coach</h2>
-  <div class="chat">
-    <div class="msg">
-      <div class="avatar">🧑‍🏫</div>
-      <div class="bubble">{{ c.resumen }}</div>
-    </div>
-
-    @if (c.pedir_regrabar) {
-      <div class="msg">
-        <div class="avatar">🧑‍🏫</div>
-        <div class="bubble warn">
-          Te recomiendo volver a grabar el tiro para poder evaluarlo bien.
-        </div>
-      </div>
+<details class="card feedback-fold coach-fold">
+  <summary>
+    <span class="fold-heading"><strong>Tu coach</strong></span>
+    <span class="muted fold-preview">{{ c.resumen }}</span>
+    @if (topIssue(); as issue) {
+      <span class="fold-hint">A mejorar: {{ issue.titulo }}</span>
     }
-
-    @if (c.lo_hiciste_bien.length) {
+    <span class="fold-hint">Ver recomendaciones completas</span>
+  </summary>
+  <div class="fold-content">
+    <div class="chat">
       <div class="msg">
         <div class="avatar">🧑‍🏫</div>
-        <div class="bubble good">
-          <strong>Lo hiciste bien</strong>
-          <ul>
-            @for (t of c.lo_hiciste_bien; track $index) {
-              <li>{{ t }}</li>
-            }
-          </ul>
-        </div>
+        <div class="bubble">{{ c.resumen }}</div>
       </div>
-    }
 
-    @for (m of c.puedes_mejorar; track m.titulo; let i = $index) {
-      <div class="msg">
-        <div class="avatar">🧑‍🏫</div>
-        <div class="bubble">
-          <span class="pill">Mejora {{ i + 1 }}</span>
-          <h4>{{ m.titulo }}</h4>
-          <p>{{ m.que_pasa }}</p>
-          <p class="muted">{{ m.por_que_importa }}</p>
-          <div class="try-box">
-            <strong>Intenta esto</strong>
-            <p>{{ m.intenta_esto }}</p>
+      @if (c.pedir_regrabar) {
+        <div class="msg">
+          <div class="avatar">🧑‍🏫</div>
+          <div class="bubble warn">
+            Te recomiendo volver a grabar el tiro para poder evaluarlo bien.
           </div>
         </div>
-      </div>
-    }
+      }
 
-    @if (c.sobre_tu_objetivo) {
-      <div class="msg">
-        <div class="avatar">🧑‍🏫</div>
-        <div class="bubble">
-          <strong>Sobre tu objetivo</strong>
-          <p>{{ c.sobre_tu_objetivo }}</p>
-        </div>
-      </div>
-    }
-    @if (c.progreso) {
-      <div class="msg">
-        <div class="avatar">🧑‍🏫</div>
-        <div class="bubble">
-          <strong>Tu progreso</strong>
-          <p>{{ c.progreso }}</p>
-        </div>
-      </div>
-    }
-  </div>
-</section>
-
-<section aria-labelledby="moments-title">
-  <h2 id="moments-title" class="section-title">Momentos clave</h2>
-  <div class="feedback-shots">
-    @for (s of orderedShots(); track s.n) {
-      <article class="card shot">
-        @if (s.clip_url || s.frame_url) {
-          <div class="shot-media">
-            @if (s.clip_url) {
-              <app-secure-media [path]="s.clip_url" kind="video" />
-            } @else {
-              <app-secure-media
-                [path]="s.frame_url"
-                kind="img"
-                [alt]="'Lanzamiento a los ' + s.times_s.release.toFixed(1) + ' segundos'"
-              />
-              @if (mediaPending()) {
-                <span class="media-tag">Generando clip…</span>
+      @if (c.lo_hiciste_bien.length) {
+        <div class="msg">
+          <div class="avatar">🧑‍🏫</div>
+          <div class="bubble good">
+            <strong>Lo hiciste bien</strong>
+            <ul>
+              @for (t of c.lo_hiciste_bien; track $index) {
+                <li>{{ t }}</li>
               }
-            }
+            </ul>
           </div>
-        } @else if (mediaPending()) {
-          <p class="muted small">Generando clip…</p>
-        }
-        <div class="shot-head">
-          <button type="button" class="btn small" (click)="player.seek(s.times_s.release)">
-            {{ s.times_s.release.toFixed(1) }} s ↗
-          </button>
-          <span class="badge" [class]="s.verdict">{{ verdictLabel[s.verdict] }}</span>
         </div>
-        <dl>
-          <div>
-            <dt>Puntaje</dt>
-            <dd>{{ s.score }}/100</dd>
+      }
+
+      @for (m of c.puedes_mejorar; track m.titulo; let i = $index) {
+        <div class="msg">
+          <div class="avatar">🧑‍🏫</div>
+          <div class="bubble">
+            <span class="pill">Mejora {{ i + 1 }}</span>
+            <h4>{{ m.titulo }}</h4>
+            <p>{{ m.que_pasa }}</p>
+            <p class="muted">{{ m.por_que_importa }}</p>
+            <div class="try-box">
+              <strong>Intenta esto</strong>
+              <p>{{ m.intenta_esto }}</p>
+            </div>
           </div>
-          <div>
-            <dt>{{ metric() }}</dt>
-            <dd>{{ value(s.value) }}</dd>
+        </div>
+      }
+
+      @if (c.sobre_tu_objetivo) {
+        <div class="msg">
+          <div class="avatar">🧑‍🏫</div>
+          <div class="bubble">
+            <strong>Sobre tu objetivo</strong>
+            <p>{{ c.sobre_tu_objetivo }}</p>
           </div>
-          <div>
-            <dt>Pausa antes del tiro</dt>
-            <dd>
-              {{
-                s.has_pause
-                  ? 'Sí' + (s.pause_s != null ? ' (' + s.pause_s.toFixed(2) + ' s)' : '')
-                  : 'No detectada'
-              }}
-            </dd>
+        </div>
+      }
+      @if (c.progreso) {
+        <div class="msg">
+          <div class="avatar">🧑‍🏫</div>
+          <div class="bubble">
+            <strong>Tu progreso</strong>
+            <p>{{ c.progreso }}</p>
           </div>
-        </dl>
-      </article>
-    }
+        </div>
+      }
+    </div>
   </div>
-</section>
+</details>
+
+@if (r.shots.length) {
+  <details
+    class="card feedback-fold moments-fold"
+    (toggle)="momentsOpen.set($any($event.target).open)"
+  >
+    <summary>
+      <span class="fold-heading"
+        ><strong>Momentos clave</strong
+        ><span class="muted small"
+          >{{ r.shots.length }} {{ r.shots.length === 1 ? 'lanzamiento' : 'lanzamientos' }}</span
+        ></span
+      >
+      <span class="fold-hint">Explorar video, métricas y ángulo de cada lanzamiento</span>
+    </summary>
+    <div class="fold-content">
+      @if (momentsOpen()) {
+        <app-shot-carousel
+          [analysisId]="r.analysis_id"
+          [shots]="orderedShots()"
+          [frames]="r.frames"
+          [rule]="r.rule"
+          [mediaPending]="mediaPending()"
+          (momentSelected)="player.seek($event)"
+        />
+      }
+    </div>
+  </details>
+}
 
 @if (r.quality.note) {
   <p class="note warn">{{ r.quality.note }}</p>

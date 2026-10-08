@@ -65,14 +65,17 @@ src/app/
   se muestra la imagen del tiro y se sigue consultando hasta que estén listos.
 - La evaluación es solo del codo y con una regla provisional; la interfaz lo indica.
 
-## Feedback unificado (base: rama Prueba)
+## Feedback unificado (base: PR CambiosJuandi hacia Prueba)
 
 - Conserva la interfaz móvil oscura de Alejo, el anillo de puntaje y el coach tipo chat.
 - Muestra el video completo arriba con esqueleto, ángulo, estela y velocidades 1×, 0.5× y 0.25×.
 - El overlay usa los nombres de articulaciones del backend, admite puntos ausentes y se actualiza al reproducir, pausar, adelantar o cambiar el tamaño del video.
 - Muestra la evolución del puntaje solo cuando hay más de un lanzamiento; conserva la gráfica del ángulo en el tiempo.
 - Sustituye los rótulos «Tiro 1, Tiro 2» por momentos en segundos que permiten saltar al video.
-- Calcula la racha de días consecutivos desde el historial y la fecha del análisis actual, según la zona horaria del navegador. Si el historial falla, no muestra una racha inventada.
+- Muestra la racha en inicio, calculada desde el historial según la zona horaria del navegador. Si el historial falla, no muestra una racha inventada.
+- El video ocupa todo el ancho y conserva su proporción original sin recortes.
+- Momentos clave se despliega como carrusel horizontal: selección por tiempo, flechas, teclado o deslizamiento; cada lanzamiento muestra sus métricas y su propia gráfica de ángulo. Los clips se cargan solo al abrirlo y seleccionar el lanzamiento.
+- El coach muestra un resumen breve; las recomendaciones completas se pueden desplegar.
 - El video sigue usando la descarga autenticada con X-User-Id. No agrega dependencias ni Electron.
 
 Para probar: inicia el backend y Angular como se indica arriba y abre un análisis terminado desde el historial, o sube un video nuevo. Verifica un video con un lanzamiento y otro con varios.
